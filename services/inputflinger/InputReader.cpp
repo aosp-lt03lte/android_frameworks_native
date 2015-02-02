@@ -16,7 +16,7 @@
 
 #define LOG_TAG "InputReader"
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 // Log debug messages for each raw event received from the EventHub.
 #define DEBUG_RAW_EVENTS 0
@@ -3079,7 +3079,8 @@ void TouchInputMapper::configure(nsecs_t when,
     if (!changes || (changes & (InputReaderConfiguration::CHANGE_DISPLAY_INFO
             | InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT
             | InputReaderConfiguration::CHANGE_SHOW_TOUCHES
-            | InputReaderConfiguration::CHANGE_EXTERNAL_STYLUS_PRESENCE))) {
+            | InputReaderConfiguration::CHANGE_EXTERNAL_STYLUS_PRESENCE
+            | InputReaderConfiguration::CHANGE_STYLUS_ICON_ENABLED))) {
         // Configure device sources, surface dimensions, orientation and
         // scaling factors.
         configureSurface(when, &resetNeeded);
@@ -5005,7 +5006,7 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_MULTI_TOUCH
                 && mPointerGesture.lastGestureMode == PointerGesture::FREEFORM) {
             // Remind the user of where the pointer is after finishing a gesture with spots.
-            mPointerController->unfade(PointerControllerInterface::TRANSITION_GRADUAL);
+            unfadePointer(PointerControllerInterface::TRANSITION_GRADUAL);
         }
         break;
     case PointerGesture::TAP:
@@ -6088,7 +6089,7 @@ void TouchInputMapper::dispatchPointerSimple(nsecs_t when, uint32_t policyFlags,
             mPointerController->setPresentation(PointerControllerInterface::PRESENTATION_POINTER);
             mPointerController->clearSpots();
             mPointerController->setButtonState(mCurrentRawState.buttonState);
-            mPointerController->unfade(PointerControllerInterface::TRANSITION_IMMEDIATE);
+            unfadePointer(PointerControllerInterface::TRANSITION_IMMEDIATE);
         } else if (!down && !hovering && (mPointerSimple.down || mPointerSimple.hovering)) {
             mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
         }
@@ -6292,6 +6293,13 @@ bool TouchInputMapper::updateMovedPointers(const PointerProperties* inProperties
 void TouchInputMapper::fadePointer() {
     if (mPointerController != NULL) {
         mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
+    }
+}
+
+void TouchInputMapper::unfadePointer(PointerControllerInterface::Transition transition) {
+    if (mPointerController != NULL &&
+            !(mPointerUsage == POINTER_USAGE_STYLUS && !mConfig.stylusIconEnabled)) {
+        mPointerController->unfade(transition);
     }
 }
 
