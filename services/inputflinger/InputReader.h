@@ -144,9 +144,6 @@ struct InputReaderConfiguration {
         // The presence of an external stylus has changed.
         CHANGE_EXTERNAL_STYLUS_PRESENCE = 1 << 7,
 
-        // Stylus icon option changed.
-        CHANGE_STYLUS_ICON_ENABLED = 1 << 9,
-
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
     };
@@ -231,14 +228,11 @@ struct InputReaderConfiguration {
     // will cover this portion of the display diagonal.
     float pointerGestureZoomSpeedRatio;
 
-    // Ignore finger touches this long after the stylus has been used (including hover)
-    nsecs_t stylusPalmRejectionTime;
-
     // True to show the location of touches on the touch screen as spots.
     bool showTouches;
-
-    // True to show the pointer icon when a stylus is used.
-    bool stylusIconEnabled;
+    
+    // Ignore finger touches this long after the stylus has been used (including hover)
+    nsecs_t stylusPalmRejectionTime;
 
     InputReaderConfiguration() :
             virtualKeyQuietTime(0),
@@ -257,10 +251,8 @@ struct InputReaderConfiguration {
             pointerGestureMovementSpeedRatio(0.8f),
             pointerGestureZoomSpeedRatio(0.3f),
             stylusPalmRejectionTime(50 * 10000000LL), // 50 ms
-            showTouches(false),
-            stylusIconEnabled(false)
-{ }
-            
+            showTouches(false) { }
+
     bool getDisplayInfo(bool external, DisplayViewport* outViewport) const;
     void setDisplayInfo(bool external, const DisplayViewport& viewport);
 
@@ -1898,8 +1890,6 @@ private:
 
     static void assignPointerIds(const RawState* last, RawState* current);
     
-    void unfadePointer(PointerControllerInterface::Transition transition);
-
     bool rejectPalm(nsecs_t when);
 };
 
